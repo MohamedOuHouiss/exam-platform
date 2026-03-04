@@ -15,23 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.setProperty('--ripple-y', `${y}%`);
     }
 
+    // Add basePath to handle GitHub Pages subdirectory
+    const basePath = '/exam-platform';
+
     // ── Navigate to exam ──
     function navigateTo(url) {
         // Clear any previous exam session
         sessionStorage.removeItem('examState');
         sessionStorage.removeItem('timerStart');
 
+        const fullUrl = `${basePath}${url}`;
+
         // Use View Transition API if available
         if (document.startViewTransition) {
             document.startViewTransition(() => {
-                window.location.href = url;
+                window.location.href = fullUrl;
             });
         } else {
             // Fallback: fade out then navigate
             document.body.style.opacity = '0';
             document.body.style.transition = 'opacity 0.3s ease';
             setTimeout(() => {
-                window.location.href = url;
+                window.location.href = fullUrl;
             }, 300);
         }
     }

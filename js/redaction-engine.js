@@ -1,6 +1,6 @@
 /* ===================================================
-   REDACTION ENGINE — Rédaction state + Quill integration
-   Performance-optimised, sticky clinical cases
+   REDACTION ENGINE — Rédaction state + TinyMCE integration
+   Enterprise-level rich text editing for medical exams
    =================================================== */
 
 import { ExamTimer, initTimerUI } from './timer.js';
@@ -15,9 +15,9 @@ class RedactionExam {
         this.container = document.getElementById('questionContainer');
         this.direction = 'right';
 
-        // Store Quill deltas per question
-        this.deltas = new Map();
-        this.quillInstance = null;
+        // Store HTML content per question
+        this.contents = new Map();
+        this.editorInstance = null;
 
         // Pre-compute clinical case groups
         this._caseGroups = this._buildCaseGroups();
@@ -38,17 +38,12 @@ class RedactionExam {
 
         initTimerUI(this.timer);
 
-        // ── Custom Table UI ──
-        this._buildTablePicker();
-        this._buildTableContextMenu();
-        document.addEventListener('editor:showTablePicker', (e) => this._showTablePicker(e.detail.button, e.detail.quill));
-
         // ── Bind events ──
         this._bindFinishModal();
         this._bindTimeUpModal();
 
-        // ── Restore deltas from session ──
-        this._restoreDeltas();
+        // ── Restore contents from session ──
+        this._restoreContents();
 
         // ── Render first question ──
         this._render(0);
@@ -97,7 +92,7 @@ class RedactionExam {
     // ── Navigation ──
 
     _goTo(index, direction) {
-        this._saveCurrentDelta();
+        this._saveCurrentContent();
 
         const prevIndex = this.currentIndex;
         this.direction = direction;
@@ -114,14 +109,14 @@ class RedactionExam {
         }
     }
 
-    _saveCurrentDelta() {
-        if (this.quillInstance) {
-            const delta = this.quillInstance.getContents();
-            const text = this.quillInstance.getText().trim();
-            if (text.length > 0) {
-                this.deltas.set(this.currentIndex, delta);
+    _saveCurrentContent() {
+        if (this.editorInstance) {
+            const content = this.editorInstance.getContent();
+            const plainText = this.editorInstance.getContent({ format: 'text' }).trim();
+            if (plainText.length > 0 || content.includes('<table')) {
+                this.contents.set(this.currentIndex, content);
             }
-            this._persistDeltas();
+            this._persistContents();
         }
     }
 
@@ -146,7 +141,7 @@ class RedactionExam {
         html += `</div>`;
 
         this.container.innerHTML = html;
-        this._initQuill(index, state);
+        this._initEditor(index, state);
         this._bindQuestionEvents(index, state);
     }
 
@@ -160,7 +155,7 @@ class RedactionExam {
         if (questionCard) {
             questionCard.className = 'question-card fade-only';
             questionCard.innerHTML = this._renderQuestionContent(index, q, state);
-            this._initQuill(index, state);
+            this._initEditor(index, state);
             this._bindQuestionEvents(index, state);
 
             // Update case indicator
@@ -196,7 +191,7 @@ class RedactionExam {
         // Editor wrapper
         html += `
       <div class="editor-wrapper ${state.locked ? 'locked' : ''}" id="editorWrapper">
-        <div id="quillEditor"></div>
+        <textarea id="tinyEditor"></textarea>
         <div class="editor-actions">
           <span class="editor-word-count" id="wordCount">0 mots</span>
           <div style="display: flex; align-items: center; gap: var(--space-sm);">
@@ -246,79 +241,51 @@ class RedactionExam {
     `;
     }
 
-    _initQuill(index, state) {
-        const editorEl = document.getElementById('quillEditor');
-        if (!editorEl) return;
+    _initEditor(index, state) {
+        if (this.editorInstance) {
+            this.editorInstance.destroy();
+            this.editorInstance = null;
+        }
 
-        const Quill = window.Quill;
-        if (!Quill) {
-            console.error('Quill not loaded');
+        const tinymce = window.tinymce;
+        if (!tinymce) {
+            console.error('TinyMCE not loaded');
             return;
         }
 
-        this.quillInstance = new Quill('#quillEditor', {
-            theme: 'snow',
-            placeholder: 'Rédigez votre réponse ici...',
-            readOnly: state.locked,
-            modules: {
-                table: true,
-                toolbar: state.locked ? false : {
-                    container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        ['table'],
-                        ['clean'],
-                    ],
-                    handlers: {
-                        table: function () {
-                            document.dispatchEvent(new CustomEvent('editor:showTablePicker', {
-                                detail: {
-                                    button: document.querySelector('.ql-table'),
-                                    quill: this.quill
-                                }
-                            }));
-                        }
-                    }
-                }
-            },
-        });
-
-        // Inject SVG for the table button since Quill doesn't provide a default one for Snow
-        const tableBtn = document.querySelector('.ql-table');
-        if (tableBtn && !tableBtn.innerHTML.trim()) {
-            tableBtn.innerHTML = `<svg viewBox="0 0 18 18"><rect class="ql-stroke" height="12" width="14" x="2" y="3"></rect><line class="ql-stroke" x1="2" x2="16" y1="7" y2="7"></line><line class="ql-stroke" x1="2" x2="16" y1="11" y2="11"></line><line class="ql-stroke" x1="7" x2="7" y1="3" y2="15"></line><line class="ql-stroke" x1="11" x2="11" y1="3" y2="15"></line></svg>`;
-        }
-
-        // Restore saved content
-        const savedDelta = this.deltas.get(index);
-        if (savedDelta) {
-            this.quillInstance.setContents(savedDelta);
-        }
-
-        // Word count & Table Context Menu
-        this._updateWordCount();
-        this.quillInstance.on('text-change', () => {
-            this._updateWordCount();
-        });
-        this.quillInstance.on('selection-change', (range) => {
-            if (range) {
-                const format = this.quillInstance.getFormat(range);
-                if (format && format.table) {
-                    setTimeout(() => {
-                        this._showTableContextMenu(this.quillInstance);
-                    }, 50);
-                    return;
-                }
+        tinymce.init({
+            selector: '#tinyEditor',
+            height: 450,
+            menubar: false,
+            plugins: 'table lists link anchor autoresize',
+            toolbar: state.locked ? false : 'undo redo | blocks | bold italic underline | bullist numlist | table | removeformat',
+            content_style: `
+                body { font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a2e; line-height: 1.6; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
+                table td, table th { border: 1px solid #e2e8f0; padding: 8px; }
+            `,
+            readonly: state.locked,
+            branding: false,
+            promotion: false,
+            statusbar: false,
+            setup: (editor) => {
+                this.editorInstance = editor;
+                editor.on('init', () => {
+                    const saved = this.contents.get(index);
+                    if (saved) editor.setContent(saved);
+                    this._updateWordCount();
+                });
+                editor.on('input Change keyup', () => {
+                    this._updateWordCount();
+                });
             }
-            this._hideTableContextMenu();
         });
     }
 
     _updateWordCount() {
         const wc = document.getElementById('wordCount');
-        if (this.quillInstance && wc) {
-            const text = this.quillInstance.getText().trim();
+        if (this.editorInstance && wc) {
+            const text = this.editorInstance.getContent({ format: 'text' }).trim();
             const words = text.length > 0 ? text.split(/\s+/).length : 0;
             wc.textContent = `${words} mot${words !== 1 ? 's' : ''}`;
         }
@@ -361,239 +328,54 @@ class RedactionExam {
     // ── Confirm answer ──
 
     _confirmAnswer(index) {
-        if (!this.quillInstance) return;
+        if (!this.editorInstance) return;
 
-        const text = this.quillInstance.getText().trim();
-        if (text.length === 0) return;
+        const html = this.editorInstance.getContent();
+        const text = this.editorInstance.getContent({ format: 'text' }).trim();
+        if (text.length === 0 && !html.includes('<table')) return;
 
-        const delta = this.quillInstance.getContents();
-        this.deltas.set(index, delta);
-
-        this.attempts.recordAttempt(index, text);
-        this._persistDeltas();
+        this.contents.set(index, html);
+        this.attempts.recordAttempt(index, html);
+        this._persistContents();
         this.navigator.updateStates();
 
         // Re-render to show updated attempts
         const state = this.attempts.getState(index);
-        const attemptsContainer = this.container.querySelector('.question-attempts');
-        const btnConfirm = document.getElementById('btnConfirm');
 
         if (state.locked) {
-            // Full re-render for lock state
             this._renderQuestionOnly(index);
-        } else if (attemptsContainer) {
-            // Minimal update: just dots and button
-            attemptsContainer.innerHTML = `
-        <span class="question-attempts-label">Tentatives :</span>
-        ${this._renderAttemptDots(state)}
-      `;
-        }
-    }
-
-    // ── Custom Table UI Methods ──
-
-    _buildTablePicker() {
-        if (document.getElementById('tablePickerPopup')) return;
-        const popup = document.createElement('div');
-        popup.className = 'table-picker-popup';
-        popup.id = 'tablePickerPopup';
-
-        const grid = document.createElement('div');
-        grid.className = 'table-picker-grid';
-
-        for (let r = 1; r <= 8; r++) {
-            for (let c = 1; c <= 8; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'table-picker-cell';
-                cell.dataset.row = r;
-                cell.dataset.col = c;
-                cell.addEventListener('mouseover', () => this._highlightTablePickerSelection(r, c));
-                cell.addEventListener('click', () => {
-                    this._insertSpecificTable(r, c);
-                    this._hideTablePicker();
-                });
-                grid.appendChild(cell);
+        } else {
+            const attemptsContainer = this.container.querySelector('.question-attempts');
+            if (attemptsContainer) {
+                attemptsContainer.innerHTML = `
+                    <span class="question-attempts-label">Tentatives :</span>
+                    ${this._renderAttemptDots(state)}
+                `;
             }
         }
-
-        const info = document.createElement('div');
-        info.className = 'table-picker-info';
-        info.id = 'tablePickerInfo';
-        info.textContent = '1x1';
-
-        popup.appendChild(grid);
-        popup.appendChild(info);
-        document.body.appendChild(popup);
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.ql-table') && !e.target.closest('.table-picker-popup')) {
-                this._hideTablePicker();
-            }
-        });
-    }
-
-    _showTablePicker(button, quill) {
-        if (!button) return;
-        this.activeQuillForTable = quill;
-        // Capture the current selection before focus is lost to the popup
-        const sel = quill.getSelection() || { index: quill.getLength() };
-        this.activeQuillSelectionIndex = sel.index;
-
-        const rect = button.getBoundingClientRect();
-        const popup = document.getElementById('tablePickerPopup');
-        popup.style.left = `${rect.left}px`;
-        popup.style.top = `${rect.bottom + 8}px`;
-        popup.classList.add('active');
-        this._highlightTablePickerSelection(1, 1);
-    }
-
-    _hideTablePicker() {
-        const popup = document.getElementById('tablePickerPopup');
-        if (popup) popup.classList.remove('active');
-    }
-
-    _highlightTablePickerSelection(rows, cols) {
-        const popup = document.getElementById('tablePickerPopup');
-        if (!popup) return;
-        const cells = popup.querySelectorAll('.table-picker-cell');
-        cells.forEach(cell => {
-            const r = parseInt(cell.dataset.row);
-            const c = parseInt(cell.dataset.col);
-            if (r <= rows && c <= cols) cell.classList.add('highlight');
-            else cell.classList.remove('highlight');
-        });
-        document.getElementById('tablePickerInfo').textContent = `${cols}x${rows}`;
-        this.selectedTableRows = rows;
-        this.selectedTableCols = cols;
-    }
-
-    _insertSpecificTable(rows, cols) {
-        if (!this.activeQuillForTable) return;
-
-        const tableModule = this.activeQuillForTable.getModule('table');
-        const idx = this.activeQuillSelectionIndex !== undefined ? this.activeQuillSelectionIndex : this.activeQuillForTable.getLength();
-
-        this.activeQuillForTable.focus();
-
-        setTimeout(() => {
-            this.activeQuillForTable.setSelection(idx, 0);
-
-            try {
-                // Try native Quill 2.0 table insertion first
-                tableModule.insertTable(rows, cols);
-            } catch (e) {
-                console.warn('Native insertTable failed, using Delta fallback', e);
-                this._insertTableDeltaFallback(rows, cols, idx);
-            }
-        }, 10);
-    }
-
-    _insertTableDeltaFallback(rows, cols, index) {
-        const Delta = window.Quill.imports.delta;
-        let delta = new Delta().retain(index);
-
-        // Construct the table delta manually
-        for (let r = 0; r < rows; r++) {
-            const rowId = Math.random().toString(36).substring(2, 9);
-            for (let c = 0; c < cols; c++) {
-                const cellId = Math.random().toString(36).substring(2, 9);
-                delta = delta.insert('\n', { table: cellId });
-            }
-        }
-
-        this.activeQuillForTable.updateContents(delta, 'user');
-    }
-
-    _buildTableContextMenu() {
-        if (document.getElementById('tableContextMenu')) return;
-        const menu = document.createElement('div');
-        menu.className = 'table-context-menu';
-        menu.id = 'tableContextMenu';
-
-        const btns = [
-            { id: 'btnInsertColLeft', icon: '<svg viewBox="0 0 24 24"><path d="M15 4v16h2V4h-2zm4 0v16h2V4h-2zM9 4v16h2V4H9zM5 4v16h2V4H5z"/></svg>', title: 'Insérer colonne à gauche', action: 'insertColumnLeft' },
-            { id: 'btnInsertColRight', icon: '<svg viewBox="0 0 24 24"><path d="M19 4v16h2V4h-2zm-4 0v16h2V4h-2zm-4 0v16h2V4h-2zM3 4v16h2V4H3z"/></svg>', title: 'Insérer colonne à droite', action: 'insertColumnRight' },
-            { divider: true },
-            { id: 'btnInsertRowAbove', icon: '<svg viewBox="0 0 24 24"><path d="M4 15h16v-2H4v2zm0 4h16v-2H4v2zm0-8h16V9H4v2zm0-6v2h16V5H4z"/></svg>', title: 'Insérer ligne au-dessus', action: 'insertRowAbove' },
-            { id: 'btnInsertRowBelow', icon: '<svg viewBox="0 0 24 24"><path d="M4 19h16v-2H4v2zm0-4h16v-2H4v2zm0-4h16V9H4v2zm0-6h16V3H4v2z"/></svg>', title: 'Insérer ligne en-dessous', action: 'insertRowBelow' },
-            { divider: true },
-            { id: 'btnDeleteRow', icon: '<svg viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>', title: 'Supprimer la ligne', action: 'deleteRow', danger: true },
-            { id: 'btnDeleteCol', icon: '<svg viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>', title: 'Supprimer la colonne', action: 'deleteColumn', danger: true },
-            { id: 'btnDeleteTable', icon: '<svg viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>', title: 'Supprimer le tableau', action: 'deleteTable', danger: true }
-        ];
-
-        btns.forEach(b => {
-            if (b.divider) {
-                const div = document.createElement('div');
-                div.className = 'menu-divider';
-                menu.appendChild(div);
-                return;
-            }
-            const btn = document.createElement('button');
-            btn.innerHTML = b.icon;
-            btn.title = b.title;
-            if (b.danger) btn.classList.add('danger');
-
-            btn.addEventListener('click', () => {
-                if (this.activeQuillForTable) {
-                    const tableModule = this.activeQuillForTable.getModule('table');
-                    if (tableModule && typeof tableModule[b.action] === 'function') {
-                        tableModule[b.action]();
-                    }
-                }
-                this._hideTableContextMenu();
-            });
-            menu.appendChild(btn);
-        });
-
-        document.body.appendChild(menu);
-
-        document.addEventListener('mousedown', (e) => {
-            if (!e.target.closest('.table-context-menu') && !e.target.closest('td')) {
-                this._hideTableContextMenu();
-            }
-        });
-    }
-
-    _showTableContextMenu(quill) {
-        const sel = quill.getSelection();
-        if (!sel) return;
-        this.activeQuillForTable = quill;
-        const bounds = quill.getBounds(sel.index);
-        const editorRect = quill.container.getBoundingClientRect();
-        const menu = document.getElementById('tableContextMenu');
-        if (!menu) return;
-        menu.style.left = `${editorRect.left + bounds.left + (bounds.width / 2)}px`;
-        menu.style.top = `${editorRect.top + bounds.top - 12 + window.scrollY}px`;
-        menu.classList.add('active');
-    }
-
-    _hideTableContextMenu() {
-        const menu = document.getElementById('tableContextMenu');
-        if (menu) menu.classList.remove('active');
     }
 
     // ── Persistence ──
 
-    _persistDeltas() {
+    _persistContents() {
         try {
             const obj = {};
-            for (const [key, val] of this.deltas.entries()) {
+            for (const [key, val] of this.contents.entries()) {
                 obj[key] = val;
             }
-            sessionStorage.setItem('redactionDeltas', JSON.stringify(obj));
+            sessionStorage.setItem('redactionContents', JSON.stringify(obj));
         } catch (e) {
             console.warn('Storage quota exceeded or unavailable', e);
         }
     }
 
-    _restoreDeltas() {
-        const saved = sessionStorage.getItem('redactionDeltas');
+    _restoreContents() {
+        const saved = sessionStorage.getItem('redactionContents');
         if (saved) {
             try {
                 const obj = JSON.parse(saved);
                 for (const [key, val] of Object.entries(obj)) {
-                    this.deltas.set(parseInt(key), val);
+                    this.contents.set(parseInt(key), val);
                 }
             } catch (e) { /* ignore */ }
         }
@@ -609,7 +391,7 @@ class RedactionExam {
         const modalText = document.getElementById('finishModalText');
 
         btnFinish.addEventListener('click', () => {
-            this._saveCurrentDelta();
+            this._saveCurrentContent();
             const stats = this.attempts.getStats();
             modalText.innerHTML = `Vous avez répondu à <strong>${stats.answered}</strong> question(s) sur <strong>${stats.total}</strong>.`;
             modal.classList.add('active');
@@ -629,7 +411,7 @@ class RedactionExam {
     }
 
     _onTimeUp() {
-        this._saveCurrentDelta();
+        this._saveCurrentContent();
         this.attempts.lockAll();
         this.navigator.updateStates();
         this._render(this.currentIndex);
@@ -641,12 +423,11 @@ class RedactionExam {
         this.attempts.lockAll();
         sessionStorage.removeItem('timerStart');
         sessionStorage.removeItem('examState');
-        sessionStorage.removeItem('redactionDeltas');
+        sessionStorage.removeItem('redactionContents');
         window.location.href = '/';
     }
 }
 
-// ── Initialize on DOM ready ──
 document.addEventListener('DOMContentLoaded', () => {
     new RedactionExam();
 });

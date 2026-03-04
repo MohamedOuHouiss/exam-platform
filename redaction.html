@@ -12,8 +12,7 @@
     <link rel="stylesheet" href="./css/timer.css" />
     <link rel="stylesheet" href="./css/navigator.css" />
     <link rel="stylesheet" href="./css/redaction.css" />
-    <!-- Quill CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <!-- Editor CSS (TinyMCE handles its own) -->
 </head>
 
 <body>
@@ -74,7 +73,7 @@
     <!-- ── Main Content ── -->
     <main class="exam-content" id="examContent">
         <div id="questionContainer">
-            <!-- Question prompt + Quill editor rendered by JS -->
+            <!-- Question prompt + TinyMCE editor rendered by JS -->
         </div>
     </main>
 
@@ -101,8 +100,8 @@
         </div>
     </div>
 
-    <!-- Quill JS -->
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <!-- TinyMCE JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.3.0/tinymce.min.js" referrerpolicy="origin"></script>
     <script type="module" src="./js/redaction-engine.js"></script>
 </body>
 

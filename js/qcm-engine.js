@@ -101,6 +101,8 @@ class QCMExam {
         if (!this.attempts._isEqual(state.answer, newAnswer)) {
             this.attempts.recordAttempt(this.currentIndex, newAnswer);
         }
+
+        this.navigator.updateStates();
     }
 
     _goTo(index, direction) {

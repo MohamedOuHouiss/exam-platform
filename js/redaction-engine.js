@@ -435,6 +435,10 @@ class RedactionExam {
     _showTablePicker(button, quill) {
         if (!button) return;
         this.activeQuillForTable = quill;
+        // Capture the current selection before focus is lost to the popup
+        const sel = quill.getSelection() || { index: quill.getLength() };
+        this.activeQuillSelectionIndex = sel.index;
+
         const rect = button.getBoundingClientRect();
         const popup = document.getElementById('tablePickerPopup');
         popup.style.left = `${rect.left}px`;
@@ -464,10 +468,40 @@ class RedactionExam {
     }
 
     _insertSpecificTable(rows, cols) {
-        if (this.activeQuillForTable) {
-            const tableModule = this.activeQuillForTable.getModule('table');
-            tableModule.insertTable(rows, cols);
+        if (!this.activeQuillForTable) return;
+
+        const tableModule = this.activeQuillForTable.getModule('table');
+        const idx = this.activeQuillSelectionIndex !== undefined ? this.activeQuillSelectionIndex : this.activeQuillForTable.getLength();
+
+        this.activeQuillForTable.focus();
+
+        setTimeout(() => {
+            this.activeQuillForTable.setSelection(idx, 0);
+
+            try {
+                // Try native Quill 2.0 table insertion first
+                tableModule.insertTable(rows, cols);
+            } catch (e) {
+                console.warn('Native insertTable failed, using Delta fallback', e);
+                this._insertTableDeltaFallback(rows, cols, idx);
+            }
+        }, 10);
+    }
+
+    _insertTableDeltaFallback(rows, cols, index) {
+        const Delta = window.Quill.imports.delta;
+        let delta = new Delta().retain(index);
+
+        // Construct the table delta manually
+        for (let r = 0; r < rows; r++) {
+            const rowId = Math.random().toString(36).substring(2, 9);
+            for (let c = 0; c < cols; c++) {
+                const cellId = Math.random().toString(36).substring(2, 9);
+                delta = delta.insert('\n', { table: cellId });
+            }
         }
+
+        this.activeQuillForTable.updateContents(delta, 'user');
     }
 
     _buildTableContextMenu() {

@@ -86,7 +86,27 @@ class QCMExam {
 
     // ── Navigation ──
 
+    _saveCurrentAnswer() {
+        if (this.currentIndex === undefined || this.currentIndex === null) return;
+        const state = this.attempts.getState(this.currentIndex);
+        if (state.locked) return;
+
+        // Harvest selected options from DOM
+        const selectedEls = this.container.querySelectorAll('.option-item.selected');
+        const current = Array.from(selectedEls).map(el => el.getAttribute('data-letter'));
+        current.sort();
+        const newAnswer = current.length > 0 ? current : null;
+
+        // Always attempt to record; attempts.js handles equality checking
+        if (!this.attempts._isEqual(state.answer, newAnswer)) {
+            this.attempts.recordAttempt(this.currentIndex, newAnswer);
+        }
+    }
+
     _goTo(index, direction) {
+        // Save current question's state before leaving
+        this._saveCurrentAnswer();
+
         const prevIndex = this.currentIndex;
         this.direction = direction;
         this.currentIndex = index;
@@ -270,51 +290,14 @@ class QCMExam {
         return answer === letter;
     }
 
-    // ── Option click — optimised DOM manipulation ──
+    // ── Option click — simply toggle visual selection ──
 
     _onOptionClick(optEl, qIndex) {
-        const letter = optEl.getAttribute('data-letter');
         const state = this.attempts.getState(qIndex);
+        if (state.locked) return;
 
-        // Always multi-select: toggle in array
-        const current = Array.isArray(state.answer) ? [...state.answer] : [];
-        const idx = current.indexOf(letter);
-        if (idx === -1) {
-            current.push(letter);
-            current.sort();
-        } else {
-            current.splice(idx, 1);
-        }
-        const newAnswer = current.length > 0 ? current : null;
-
-        // Record the attempt
-        if (newAnswer !== null) {
-            const result = this.attempts.recordAttempt(qIndex, newAnswer);
-
-            // If locked after this attempt, re-render to show lock state
-            if (result.locked) {
-                this._renderQuestionOnly(qIndex);
-                this.navigator.updateStates();
-                return;
-            }
-        }
-
-        // Optimised: toggle class directly instead of full re-render
+        // Visual toggle only; state is saved upon navigation
         optEl.classList.toggle('selected');
-        const checkbox = optEl.querySelector('.option-checkbox');
-        // No need to manipulate checkbox — CSS handles it via .selected parent
-
-        // Update attempt dots without full re-render
-        const attemptsContainer = this.container.querySelector('.question-attempts');
-        if (attemptsContainer && newAnswer !== null) {
-            const newState = this.attempts.getState(qIndex);
-            attemptsContainer.innerHTML = `
-        <span class="question-attempts-label">Tentatives :</span>
-        ${this._renderAttemptDots(newState)}
-      `;
-        }
-
-        this.navigator.updateStates();
     }
 
     // ── Finish exam ──
@@ -327,6 +310,7 @@ class QCMExam {
         const modalText = document.getElementById('finishModalText');
 
         btnFinish.addEventListener('click', () => {
+            this._saveCurrentAnswer(); // Save before showing stats
             const stats = this.attempts.getStats();
             modalText.innerHTML = `Vous avez répondu à <strong>${stats.answered}</strong> question(s) sur <strong>${stats.total}</strong>.`;
             modal.classList.add('active');
@@ -354,6 +338,7 @@ class QCMExam {
     }
 
     _onTimeUp() {
+        this._saveCurrentAnswer(); // Capture last unsaved state
         this.attempts.lockAll();
         this.navigator.updateStates();
         this._render(this.currentIndex);

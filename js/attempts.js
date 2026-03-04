@@ -39,8 +39,8 @@ export class AttemptsTracker {
             return { success: false, attemptsRemaining: 0, locked: true };
         }
 
-        // If first answer or answer changed
-        if (q.answer === null || !this._isEqual(q.answer, value)) {
+        // If answer fundamentally changed
+        if (!this._isEqual(q.answer, value)) {
             q.answer = value;
             q.attemptsUsed++;
 

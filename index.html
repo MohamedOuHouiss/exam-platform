@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Plateforme d'examens — Faculté de Médecine et de Pharmacie de Fès. QCM et Rédaction en ligne." />
+  <meta name="description"
+    content="Plateforme d'examens — Faculté de Médecine et de Pharmacie de Fès. QCM et Rédaction en ligne." />
   <title>Examens — FMPF</title>
-  <link rel="stylesheet" href="/css/tokens.css" />
-  <link rel="stylesheet" href="/css/base.css" />
-  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="./css/tokens.css" />
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/components.css" />
   <style>
     /* ── Landing-specific styles ── */
     .landing {
@@ -36,8 +38,15 @@
     }
 
     @keyframes floatLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
     }
 
     .landing-title {
@@ -180,10 +189,11 @@
     }
   </style>
 </head>
+
 <body>
   <main class="landing">
     <header class="landing-header">
-      <img src="/assets/logo.svg" alt="FMPF Logo" class="landing-logo" />
+      <img src="./assets/logo.svg" alt="FMPF Logo" class="landing-logo" />
       <h1 class="landing-title">Plateforme d'<span>Examens</span></h1>
       <p class="landing-subtitle">Faculté de Médecine et de Pharmacie de Fès</p>
       <div class="landing-divider"></div>
@@ -195,7 +205,8 @@
 
     <div class="exam-cards">
       <!-- QCM Card -->
-      <div class="card card-hover exam-card" id="card-qcm" tabindex="0" role="button" aria-label="Commencer l'examen QCM">
+      <div class="card card-hover exam-card" id="card-qcm" tabindex="0" role="button"
+        aria-label="Commencer l'examen QCM">
         <div class="exam-card-icon">📋</div>
         <h3>QCM</h3>
         <p>Questions à choix multiples — sélectionnez la ou les bonne(s) réponse(s) parmi les propositions.</p>
@@ -207,7 +218,8 @@
       </div>
 
       <!-- Rédaction Card -->
-      <div class="card card-hover exam-card" id="card-redaction" tabindex="0" role="button" aria-label="Commencer l'examen Rédaction">
+      <div class="card card-hover exam-card" id="card-redaction" tabindex="0" role="button"
+        aria-label="Commencer l'examen Rédaction">
         <div class="exam-card-icon">✍️</div>
         <h3>Rédaction</h3>
         <p>Répondez aux questions cliniques et théoriques avec un éditeur de texte enrichi.</p>
@@ -224,6 +236,7 @@
     © 2026 FMPF — Plateforme d'Examens · Version Démo
   </footer>
 
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="./js/app.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Plateforme d'examens — Faculté de Médecine et de Pharmacie de Fès. QCM et Rédaction en ligne." />
+  <title>Examens — FMPF</title>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <style>
+    /* ── Landing-specific styles ── */
+    .landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl);
+      position: relative;
+      z-index: var(--z-base);
+    }
+
+    .landing-header {
+      text-align: center;
+      margin-bottom: var(--space-3xl);
+      animation: fadeSlideIn var(--duration-slow) var(--ease-out) both;
+    }
+
+    .landing-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-lg);
+      filter: drop-shadow(0 4px 12px rgba(var(--primary-rgb), 0.2));
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .landing-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: var(--space-xs);
+      letter-spacing: -0.02em;
+    }
+
+    .landing-title span {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .landing-subtitle {
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .landing-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      border-radius: 2px;
+      margin: var(--space-lg) auto;
+    }
+
+    .landing-description {
+      max-width: 480px;
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── Exam cards grid ── */
+    .exam-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-xl);
+      max-width: 720px;
+      width: 100%;
+      animation: fadeSlideIn var(--duration-slow) var(--ease-out) 0.2s both;
+    }
+
+    .exam-card {
+      padding: var(--space-2xl);
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .exam-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--primary-light));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--duration-normal) var(--ease-out);
+    }
+
+    .exam-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .exam-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .exam-card-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), rgba(var(--accent-rgb), 0.08));
+      border-radius: var(--radius-lg);
+      font-size: 1.8rem;
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .exam-card:hover .exam-card-icon {
+      transform: scale(1.1);
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(var(--accent-rgb), 0.15));
+    }
+
+    .exam-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .exam-card p {
+      font-size: 0.88rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .exam-card-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .exam-card-meta .badge {
+      font-size: 0.68rem;
+    }
+
+    /* ── Footer ── */
+    .landing-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-md);
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+
+    @media (max-width: 640px) {
+      .exam-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="landing">
+    <header class="landing-header">
+      <img src="/assets/logo.svg" alt="FMPF Logo" class="landing-logo" />
+      <h1 class="landing-title">Plateforme d'<span>Examens</span></h1>
+      <p class="landing-subtitle">Faculté de Médecine et de Pharmacie de Fès</p>
+      <div class="landing-divider"></div>
+      <p class="landing-description">
+        Sélectionnez le type d'épreuve pour commencer votre examen.
+        Chaque examen comprend 40 questions avec un temps imparti de 1h30.
+      </p>
+    </header>
+
+    <div class="exam-cards">
+      <!-- QCM Card -->
+      <div class="card card-hover exam-card" id="card-qcm" tabindex="0" role="button" aria-label="Commencer l'examen QCM">
+        <div class="exam-card-icon">📋</div>
+        <h3>QCM</h3>
+        <p>Questions à choix multiples — sélectionnez la ou les bonne(s) réponse(s) parmi les propositions.</p>
+        <div class="exam-card-meta">
+          <span class="badge badge-primary">40 Questions</span>
+          <span class="badge badge-accent">1h 30min</span>
+          <span class="badge badge-warning">3 tentatives</span>
+        </div>
+      </div>
+
+      <!-- Rédaction Card -->
+      <div class="card card-hover exam-card" id="card-redaction" tabindex="0" role="button" aria-label="Commencer l'examen Rédaction">
+        <div class="exam-card-icon">✍️</div>
+        <h3>Rédaction</h3>
+        <p>Répondez aux questions cliniques et théoriques avec un éditeur de texte enrichi.</p>
+        <div class="exam-card-meta">
+          <span class="badge badge-primary">40 Questions</span>
+          <span class="badge badge-accent">1h 30min</span>
+          <span class="badge badge-warning">3 tentatives</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="landing-footer">
+    © 2026 FMPF — Plateforme d'Examens · Version Démo
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

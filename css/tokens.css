@@ -1,0 +1,79 @@
+/* ===================================================
+   DESIGN TOKENS — FMPF Exam Platform
+   =================================================== */
+:root {
+  /* ── Primary palette ── */
+  --primary:        #1B3A6B;
+  --primary-light:  #2A5298;
+  --primary-dark:   #0F2444;
+  --primary-rgb:    27, 58, 107;
+
+  /* ── Accent (gold) ── */
+  --accent:         #C8A951;
+  --accent-light:   #DFC575;
+  --accent-dark:    #A68B3A;
+  --accent-rgb:     200, 169, 81;
+
+  /* ── Surfaces ── */
+  --surface:        #F0F2F7;
+  --surface-alt:    #E6E9F0;
+  --card:           #FFFFFF;
+  --card-hover:     #FAFBFD;
+
+  /* ── Text ── */
+  --text:           #1A1A2E;
+  --text-secondary: #4A5568;
+  --text-muted:     #8896A6;
+  --text-inverse:   #FFFFFF;
+
+  /* ── Semantic ── */
+  --success:        #27AE60;
+  --success-light:  #D4EFDF;
+  --warning:        #E67E22;
+  --warning-light:  #FAE5D3;
+  --danger:         #E74C3C;
+  --danger-light:   #FADBD8;
+  --info:           #3498DB;
+
+  /* ── Spacing scale ── */
+  --space-xs:   0.25rem;
+  --space-sm:   0.5rem;
+  --space-md:   1rem;
+  --space-lg:   1.5rem;
+  --space-xl:   2rem;
+  --space-2xl:  3rem;
+  --space-3xl:  4rem;
+
+  /* ── Radii ── */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-full: 50%;
+
+  /* ── Shadows ── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:  0 10px 30px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+  --shadow-xl:  0 20px 50px rgba(0,0,0,0.15);
+  --shadow-glow: 0 0 20px rgba(var(--accent-rgb), 0.3);
+
+  /* ── Transitions ── */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* ── Typography ── */
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'Source Serif 4', 'Georgia', serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Z-index layers ── */
+  --z-base:    1;
+  --z-nav:     100;
+  --z-timer:   200;
+  --z-modal:   1000;
+  --z-toast:   1100;
+}

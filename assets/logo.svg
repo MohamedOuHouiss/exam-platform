@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Shield background -->
+  <path d="M60 8 L105 28 L105 65 C105 90 85 108 60 115 C35 108 15 90 15 65 L15 28 Z" fill="#1B3A6B"/>
+  <path d="M60 14 L98 32 L98 64 C98 86 80 102 60 108 C40 102 22 86 22 64 L22 32 Z" fill="#2A5298"/>
+  <!-- Caduceus -->
+  <line x1="60" y1="35" x2="60" y2="90" stroke="#C8A951" stroke-width="3" stroke-linecap="round"/>
+  <!-- Wings -->
+  <path d="M60 42 Q45 32 38 38 Q32 44 42 48 L60 42" fill="#C8A951" opacity="0.9"/>
+  <path d="M60 42 Q75 32 82 38 Q88 44 78 48 L60 42" fill="#C8A951" opacity="0.9"/>
+  <!-- Snakes -->
+  <path d="M60 50 Q48 55 48 62 Q48 70 60 68 Q72 66 72 74 Q72 82 60 80" stroke="#F5F7FA" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M60 50 Q72 55 72 62 Q72 70 60 68 Q48 66 48 74 Q48 82 60 80" stroke="#C8A951" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <!-- Top circle -->
+  <circle cx="60" cy="35" r="5" fill="#C8A951"/>
+  <!-- Text -->
+  <text x="60" y="102" text-anchor="middle" font-family="serif" font-size="9" font-weight="bold" fill="#F5F7FA" letter-spacing="0.5">FMPF</text>
+</svg>

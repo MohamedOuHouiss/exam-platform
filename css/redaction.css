@@ -1,0 +1,433 @@
+/* ===================================================
+   RÉDACTION — Essay / Clinical Case Exam Styles
+   =================================================== */
+
+/* ── Clinical case (sticky for grouped questions) ── */
+.clinical-case-sticky {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.04);
+    contain: layout style;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.clinical-case-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(var(--primary-rgb), 0.02);
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.06);
+    cursor: pointer;
+    user-select: none;
+}
+
+.clinical-case-icon {
+    font-size: 1.4rem;
+    color: var(--primary);
+}
+
+.clinical-case-title {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.clinical-case-questions-indicator {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-left: auto;
+    background: rgba(var(--accent-rgb), 0.15);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+}
+
+.clinical-case-toggle {
+    font-size: 0.8rem;
+    color: var(--primary);
+    transition: transform 150ms ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.clinical-case-sticky.collapsed .clinical-case-toggle {
+    transform: rotate(-90deg);
+}
+
+.clinical-case-body {
+    padding: var(--space-lg) var(--space-xl);
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-height: 800px;
+    overflow-y: auto;
+    transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), padding 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+    border-bottom: 1px dashed rgba(var(--primary-rgb), 0.1);
+    background: #fafbfa;
+}
+
+.clinical-case-sticky.collapsed .clinical-case-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    border-bottom: none;
+}
+
+/* Base card styling for standalone redaction prompts */
+.redaction-prompt.card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(var(--primary-rgb), 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+}
+
+/* Integrated layout: When question is inside the clinical case master container */
+.clinical-case-sticky+#questionCard .redaction-prompt.card,
+.clinical-case-sticky~.redaction-prompt.card,
+#stickyCase+.redaction-prompt.card,
+.clinical-case-sticky+.redaction-prompt.card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: var(--space-xl);
+    max-width: 100%;
+    margin-bottom: 0;
+    border-radius: 0;
+}
+
+/* The editor itself when inside a clinical case */
+.clinical-case-sticky+#questionCard .editor-wrapper,
+.clinical-case-sticky~.editor-wrapper,
+#stickyCase+.editor-wrapper,
+.clinical-case-sticky+.editor-wrapper {
+    margin: 0 var(--space-xl) var(--space-xl);
+    border-radius: var(--radius-md);
+    width: auto;
+    max-width: none;
+}
+
+/* ── Question prompt ── */
+.redaction-prompt {
+    max-width: 800px;
+    margin: 0 auto var(--space-lg);
+}
+
+.redaction-prompt .question-text {
+    margin-bottom: var(--space-md);
+}
+
+/* ── Editor wrapper ── */
+.editor-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid rgba(var(--primary-rgb), 0.06);
+    transition: border-color var(--duration-normal) var(--ease-out),
+        box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.editor-wrapper:focus-within {
+    border-color: rgba(var(--primary-rgb), 0.15);
+    box-shadow: var(--shadow-lg), 0 0 0 3px rgba(var(--primary-rgb), 0.06);
+}
+
+.editor-wrapper.locked {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* ── Quill overrides ── */
+.editor-wrapper .ql-toolbar {
+    border: none !important;
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.06) !important;
+    background: rgba(var(--primary-rgb), 0.02);
+    padding: var(--space-sm) var(--space-md) !important;
+    font-family: var(--font-heading) !important;
+}
+
+.editor-wrapper .ql-toolbar .ql-formats {
+    margin-right: var(--space-md) !important;
+}
+
+.editor-wrapper .ql-toolbar button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: var(--radius-sm) !important;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.editor-wrapper .ql-toolbar button:hover {
+    background: rgba(var(--primary-rgb), 0.06);
+}
+
+.editor-wrapper .ql-toolbar button.ql-active {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary) !important;
+}
+
+.editor-wrapper .ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--primary) !important;
+}
+
+.editor-wrapper .ql-toolbar button.ql-active .ql-fill {
+    fill: var(--primary) !important;
+}
+
+.editor-wrapper .ql-toolbar .ql-picker {
+    font-family: var(--font-heading) !important;
+    font-size: 0.8rem !important;
+}
+
+.editor-wrapper .ql-toolbar .ql-picker-label {
+    border-radius: var(--radius-sm) !important;
+    border-color: transparent !important;
+    padding: 4px 8px !important;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.editor-wrapper .ql-toolbar .ql-picker-label:hover {
+    background: rgba(var(--primary-rgb), 0.06);
+    color: var(--primary) !important;
+}
+
+.editor-wrapper .ql-toolbar .ql-picker-options {
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border: 1px solid rgba(var(--primary-rgb), 0.08) !important;
+    padding: var(--space-xs) !important;
+}
+
+.editor-wrapper .ql-container {
+    border: none !important;
+    font-family: var(--font-body) !important;
+    font-size: 1rem !important;
+}
+
+.editor-wrapper .ql-editor {
+    min-height: 280px;
+    max-height: 450px;
+    padding: var(--space-lg) var(--space-xl) !important;
+    line-height: 1.8 !important;
+    color: var(--text) !important;
+}
+
+.editor-wrapper .ql-editor.ql-blank::before {
+    color: var(--text-muted) !important;
+    font-style: italic !important;
+    font-size: 0.95rem !important;
+}
+
+.editor-wrapper .ql-editor h1 {
+    font-family: var(--font-heading) !important;
+    font-size: 1.5rem !important;
+    color: var(--primary) !important;
+    margin-bottom: var(--space-sm) !important;
+}
+
+.editor-wrapper .ql-editor h2 {
+    font-family: var(--font-heading) !important;
+    font-size: 1.2rem !important;
+    color: var(--primary-light) !important;
+    margin-bottom: var(--space-sm) !important;
+}
+
+.editor-wrapper .ql-editor p {
+    margin-bottom: var(--space-sm) !important;
+    color: var(--text) !important;
+}
+
+.editor-wrapper .ql-editor strong {
+    color: var(--primary-dark) !important;
+}
+
+.editor-wrapper .ql-editor ol,
+.editor-wrapper .ql-editor ul {
+    padding-left: var(--space-lg) !important;
+}
+
+.editor-wrapper .ql-editor li {
+    margin-bottom: var(--space-xs) !important;
+    padding-left: var(--space-xs) !important;
+}
+
+.editor-wrapper .ql-editor table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: var(--space-md) 0 !important;
+}
+
+.editor-wrapper .ql-editor table td {
+    border: 1px solid rgba(var(--primary-rgb), 0.15) !important;
+    padding: var(--space-sm) var(--space-md) !important;
+}
+
+/* ── Confirm button area ── */
+.editor-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-xl);
+    background: rgba(var(--primary-rgb), 0.02);
+    border-top: 1px solid rgba(var(--primary-rgb), 0.06);
+}
+
+.editor-word-count {
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* ── Redaction question footer ── */
+.redaction-footer {
+    max-width: 800px;
+    margin: var(--space-lg) auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ===================================================
+   ADVANCED TABLE UI (Word-like picker & menu)
+   =================================================== */
+
+/* Table Picker Dropdown */
+.table-picker-popup {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    box-shadow: var(--shadow-xl);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.table-picker-popup.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.table-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 18px);
+    grid-template-rows: repeat(10, 18px);
+    gap: 2px;
+}
+
+.table-picker-cell {
+    width: 18px;
+    height: 18px;
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 50ms;
+}
+
+.table-picker-cell.highlight {
+    background: rgba(var(--primary-rgb), 0.2);
+    border-color: var(--primary);
+}
+
+.table-picker-info {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    margin-top: var(--space-sm);
+}
+
+/* Floating Table Menu */
+.table-context-menu {
+    position: absolute;
+    background: #fff;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(var(--primary-rgb), 0.05);
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) translateX(-50%);
+    transition: all 150ms ease;
+    pointer-events: none;
+}
+
+.table-context-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-12px) translateX(-50%);
+    pointer-events: auto;
+}
+
+.table-context-menu button {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.table-context-menu button:hover {
+    background: rgba(var(--primary-rgb), 0.06);
+    color: var(--primary);
+}
+
+.table-context-menu button svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
+.table-context-menu .menu-divider {
+    width: 1px;
+    background: rgba(var(--primary-rgb), 0.1);
+    margin: 0 4px;
+}
+
+.table-context-menu button.danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.editor-wrapper .ql-editor table td {
+    position: relative;
+}

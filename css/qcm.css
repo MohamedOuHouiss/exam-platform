@@ -1,0 +1,339 @@
+/* ===================================================
+   QCM — Multiple Choice Exam Styles
+   =================================================== */
+
+/* ── Question card ── */
+.question-card {
+    max-width: 760px;
+    margin: 0 auto;
+    will-change: transform, opacity;
+    contain: layout style;
+}
+
+.question-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.question-number {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--text-inverse);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+}
+
+.question-meta {
+    flex: 1;
+}
+
+.question-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+/* ── Clinical case (sticky for grouped questions) ── */
+.clinical-case-sticky {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.04);
+    contain: layout style;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.clinical-case-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: rgba(var(--primary-rgb), 0.02);
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.06);
+    cursor: pointer;
+    user-select: none;
+}
+
+.clinical-case-icon {
+    font-size: 1.4rem;
+    color: var(--primary);
+}
+
+.clinical-case-title {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.clinical-case-questions-indicator {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-left: auto;
+    background: rgba(var(--accent-rgb), 0.15);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+}
+
+.clinical-case-toggle {
+    font-size: 0.8rem;
+    color: var(--primary);
+    transition: transform 150ms ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.clinical-case-sticky.collapsed .clinical-case-toggle {
+    transform: rotate(-90deg);
+}
+
+.clinical-case-body {
+    padding: var(--space-lg) var(--space-xl);
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-height: 800px;
+    overflow-y: auto;
+    transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), padding 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+    border-bottom: 1px dashed rgba(var(--primary-rgb), 0.1);
+    background: #fafbfa;
+}
+
+.clinical-case-sticky.collapsed .clinical-case-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    border-bottom: none;
+}
+
+/* Base card styling for standalone questions */
+.question-card.card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(var(--primary-rgb), 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xl);
+}
+
+/* Integrated layout: When question is inside the clinical case master container */
+.clinical-case-sticky+.question-card-wrapper .question-card.card,
+.clinical-case-sticky~.question-card.card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: var(--space-xl);
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+}
+
+
+
+/* ── Options list ── */
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-xl);
+    border: 1px solid rgba(var(--primary-rgb), 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    contain: layout style;
+}
+
+.option-item:hover {
+    border-color: rgba(var(--primary-rgb), 0.2);
+    background: rgba(var(--primary-rgb), 0.02);
+    transform: translateX(3px);
+}
+
+.option-item.selected {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.04);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
+}
+
+.option-item.locked {
+    cursor: default;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.option-item.locked.selected {
+    border-color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ── Custom checkbox (all questions are multi-select) ── */
+.option-checkbox {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-sm);
+    border: 2px solid rgba(var(--primary-rgb), 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 120ms ease, background-color 120ms ease;
+    margin-top: 2px;
+}
+
+.option-item.selected .option-checkbox {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.option-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 100ms ease, transform 100ms ease;
+}
+
+.option-item.selected .option-checkbox::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ── Option label ── */
+.option-letter {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--primary);
+    min-width: 1.2em;
+}
+
+.option-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    transition: color 100ms ease, font-weight 100ms ease;
+}
+
+.option-item.selected .option-text {
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* ── Question footer ── */
+.question-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid rgba(var(--primary-rgb), 0.06);
+}
+
+.question-attempts {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.question-attempts-label {
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.question-nav-btns {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* ── Optimised card swap animations (GPU-only, fast) ── */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translate3d(24px, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(-24px, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.question-card.slide-right {
+    animation: slideInRight 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.question-card.slide-left {
+    animation: slideInLeft 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* When within a clinical case group, no animation needed (case stays) */
+.question-card.no-anim {
+    animation: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.question-card.fade-only {
+    animation: fadeIn 150ms ease both;
+}
